@@ -42,7 +42,7 @@ public class CityChooseActivity extends AppCompatActivity {
 
     public void submit(View view){
 
-        if(!(cityName.getEditText().getText().toString().equals(""))){
+        if(!(cityName.getEditText().getText().toString().trim().equals(""))){
             city = cityName.getEditText().getText().toString().toLowerCase().replace(" ", "");
             String newUrl = url + city;
 
