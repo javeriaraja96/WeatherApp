@@ -31,6 +31,8 @@ import java.util.ArrayList;
 
 public class WeatherActivity extends AppCompatActivity {
 
+    WeatherDataSet dataObj;
+
     RequestQueue queue;
     String url = "https://www.metaweather.com/api/location/";
     String woeid;
@@ -43,6 +45,7 @@ public class WeatherActivity extends AppCompatActivity {
     ConstraintLayout todaysWeather;
 
     ImageView imageState;
+    String location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,9 @@ public class WeatherActivity extends AppCompatActivity {
 
         imageState = (ImageView) findViewById(R.id.imageState);
         todaysWeather = (ConstraintLayout) findViewById(R.id.todaysWeather);
+        dataObj = new WeatherDataSet();
+
+
 
 
         queue = Volley.newRequestQueue(this);
@@ -69,32 +75,18 @@ public class WeatherActivity extends AppCompatActivity {
             public void onResponse(JSONObject response) {
                 try {
 
-                    final String location = response.getString("title");
+                    location = response.getString("title");
 
                     final JSONArray consolidatedWeather =  response.getJSONArray("consolidated_weather");
                     JSONObject dataWeather = consolidatedWeather.getJSONObject(0);
 
-                    int minTemp = (int) Float.parseFloat(dataWeather.getString("min_temp"));
-                    String minTempString = String.valueOf(minTemp);
+                //    Toast.makeText(getApplicationContext(), dataWeather.getString("applicable_date"), Toast.LENGTH_LONG).show();
 
-                    int maxTemp = (int) Float.parseFloat(dataWeather.getString("max_temp"));
-                    String maxTempString = String.valueOf(maxTemp);
-
-
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-
-                    String date = (String) DateFormat.format("MMM d, ''yy", simpleDateFormat.parse(dataWeather.getString("applicable_date")));
-
-
-                    today.setText("Today " + date);
-
-                    tempDay.setText(maxTempString);
-                    tempNight.setText(minTempString);
-                    weatherState.setText(dataWeather.getString("weather_state_name"));
-
-                    Picasso.get().load("https://www.metaweather.com/static/img/weather/png/" + dataWeather.getString("weather_state_abbr") +".png").into(imageState);
-
+                    today.setText(dataObj.getDate(dataWeather));
+                    tempDay.setText("" + dataObj.getMaxTemp(dataWeather));
+                    tempNight.setText(dataObj.getMinTemp(dataWeather));
+                    weatherState.setText(dataObj.getState(dataWeather));
+                    dataObj.LoadImage(dataWeather,imageState);
 
 
                     ArrayList<JSONObject> upcomingDaysList = new ArrayList<JSONObject>();
@@ -119,10 +111,7 @@ public class WeatherActivity extends AppCompatActivity {
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                                     try {
-                                        Intent i = new Intent(getApplicationContext(), WeatherDetailActivity.class);
-                                        i.putExtra("ITEM_EXTRA", consolidatedWeather.getJSONObject(position+1).toString());
-                                        i.putExtra("location", location);
-                                        startActivity(i);
+                                        makeIntent(consolidatedWeather.getJSONObject(position+1));
                                     }catch (Exception e){
                                         Toast.makeText(getApplicationContext(), "Data not sent :(", Toast.LENGTH_LONG).show();
                                     }
@@ -135,10 +124,8 @@ public class WeatherActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             try {
-                                Intent i = new Intent(getApplicationContext(), WeatherDetailActivity.class);
-                                i.putExtra("ITEM_EXTRA", consolidatedWeather.getJSONObject(0).toString());
-                                i.putExtra("location", location);
-                                startActivity(i);
+
+                                makeIntent(consolidatedWeather.getJSONObject(0));
                             }catch (Exception e){
                                 Toast.makeText(getApplicationContext(), "Data not sent :(", Toast.LENGTH_LONG).show();
                             }
@@ -165,5 +152,11 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
+    public void makeIntent(JSONObject obj){
+        Intent i = new Intent(getApplicationContext(), WeatherDetailActivity.class);
+        i.putExtra("ITEM_EXTRA", obj.toString());
+        i.putExtra("location", location);
+        startActivity(i);
+    }
 
 }

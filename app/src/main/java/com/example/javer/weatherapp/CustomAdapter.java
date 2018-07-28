@@ -25,6 +25,8 @@ import java.util.Date;
 public class CustomAdapter extends ArrayAdapter<JSONObject> {
     JSONObject dataWeather;
 
+    WeatherDataSet dataObj = new WeatherDataSet();
+
 
     public CustomAdapter(@NonNull Context context, ArrayList<JSONObject> days) {
         super(context, R.layout.custom_row, days);
@@ -46,31 +48,15 @@ public class CustomAdapter extends ArrayAdapter<JSONObject> {
         TextView weatherState = (TextView)  customView.findViewById(R.id.weatherState);
         ImageView weatherPic = (ImageView) customView.findViewById(R.id.weatherPic);
 
-
-
-        String maxTempString = "";
-        String minTempString = "";
         try {
 
-            int minTemp = (int) Float.parseFloat(dataWeather.getString("min_temp"));
-            minTempString = String.valueOf(minTemp);
-            int maxTemp = (int) Float.parseFloat(dataWeather.getString("max_temp"));
-            maxTempString = String.valueOf(maxTemp);
+            dayText.setText(dataObj.getDate(dataWeather));
 
-            maxTempText.setText(maxTempString);
-            minTempText.setText(minTempString);
+            maxTempText.setText(dataObj.getMaxTemp(dataWeather));
+            minTempText.setText(dataObj.getMinTemp(dataWeather));
+            weatherState.setText(dataObj.getState(dataWeather));
 
-            weatherState.setText(dataWeather.getString("weather_state_name"));
-            Picasso.get().load("https://www.metaweather.com/static/img/weather/png/" + dataWeather.getString("weather_state_abbr") + ".png").into(weatherPic);
-
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-
-            String date = (String) DateFormat.format("EEE, MMM d, ''yy", simpleDateFormat.parse(dataWeather.getString("applicable_date")));
-
-
-            dayText.setText(date);
+            dataObj.LoadImage(dataWeather,weatherPic);
 
         }catch (Exception e){
            e.printStackTrace();

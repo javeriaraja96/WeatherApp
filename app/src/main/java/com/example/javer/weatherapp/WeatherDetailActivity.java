@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 public class WeatherDetailActivity extends AppCompatActivity {
 
     TextView dayText;
-//    TextView dateText;
+
     TextView humidity;
     TextView pressure;
     TextView wind;
@@ -28,52 +28,42 @@ public class WeatherDetailActivity extends AppCompatActivity {
     TextView state;
     ImageView iconWeather;
 
+    String loc;
     JSONObject dataWeather;
+
+    WeatherDataSet dataObj;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather_detail);
 
+        loc = getIntent().getStringExtra("location");
+
+        dayText = (TextView) findViewById(R.id.dayText);
+        humidity = (TextView) findViewById(R.id.humidity);
+        pressure = (TextView) findViewById(R.id.pressure);
+        wind = (TextView) findViewById(R.id.wind);
+        location = (TextView) findViewById(R.id.location);
+        maxTempText = (TextView) findViewById(R.id.maxTemp);
+        minTempText = (TextView) findViewById(R.id.minTemp);
+        state = (TextView) findViewById(R.id.state);
+        iconWeather = (ImageView) findViewById(R.id.icon);
+        dataObj = new WeatherDataSet();
+
         try {
             dataWeather= new JSONObject(getIntent().getStringExtra("ITEM_EXTRA"));
 
-            dayText = (TextView) findViewById(R.id.dayText);
-//            dateText = (TextView) findViewById(R.id.dateText);
-            humidity = (TextView) findViewById(R.id.humidity);
-            pressure = (TextView) findViewById(R.id.pressure);
-            wind = (TextView) findViewById(R.id.wind);
-            location = (TextView) findViewById(R.id.location);
-            maxTempText = (TextView) findViewById(R.id.maxTemp);
-            minTempText = (TextView) findViewById(R.id.minTemp);
-            state = (TextView) findViewById(R.id.state);
-            iconWeather = (ImageView) findViewById(R.id.icon);
 
-            Picasso.get().load("https://www.metaweather.com/static/img/weather/png/" + dataWeather.getString("weather_state_abbr") +".png").into(iconWeather);
+            dayText.setText(dataObj.getDate(dataWeather));
+            humidity.setText(dataObj.getHumidity(dataWeather));
+            pressure.setText(dataObj.getPressure(dataWeather));
+            wind.setText(dataObj.getWindData(dataWeather));
+            location.setText("Location: " + loc);
+            maxTempText.setText(dataObj.getMaxTemp(dataWeather));
+            minTempText.setText(dataObj.getMinTemp(dataWeather));
+            state.setText(dataObj.getState(dataWeather));
 
-            int minTemp = (int) Float.parseFloat(dataWeather.getString("min_temp"));
-            String minTempString = String.valueOf(minTemp);
-
-            int maxTemp = (int) Float.parseFloat(dataWeather.getString("max_temp"));
-            String maxTempString = String.valueOf(maxTemp);
-
-            maxTempText.setText(maxTempString);
-            minTempText.setText(minTempString);
-
-            location.setText("Location: " + getIntent().getStringExtra("location"));
-            state.setText(dataWeather.getString("weather_state_name"));
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String date = (String) DateFormat.format("EEE, MMM d, ''yy", simpleDateFormat.parse(dataWeather.getString("applicable_date")));
-            dayText.setText(date);
-
-//            String dateFind = (String) DateFormat.format("", simpleDateFormat.parse(dataWeather.getString("applicable_date"),new ParsePosition(0)))
-//            dateText.setText(dateFind);
-            humidity.setText("Humidity: "+ String.valueOf((int) Float.parseFloat(dataWeather.getString("humidity")))+ " %");
-            pressure.setText("Pressure: "+ String.valueOf((int) Float.parseFloat(dataWeather.getString("air_pressure"))) + " hPa ");
-            wind.setText("Wind: "+ String.valueOf((int) Float.parseFloat(dataWeather.getString("wind_speed"))) +"km/h " +
-                    dataWeather.getString("wind_direction_compass"));
-
-
+            dataObj.LoadImage(dataWeather,iconWeather);
 
 
         }catch (Exception e) {
